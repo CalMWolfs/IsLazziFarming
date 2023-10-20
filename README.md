@@ -14,4 +14,4 @@ You can use `/lzrefresh` to refresh data, but it refreshes every 5 mins by defau
 
 ## License
 
-This project is currently licensed under LGPL-3.0, see [LICENSE](LICENSE) for more details.
+This project is currently licensed under LGPL-3.0, see [LICENSE](LICENSE.md) for more details.
