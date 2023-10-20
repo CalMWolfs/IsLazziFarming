@@ -1,7 +1,7 @@
 # IsLazziFarming Mod
 
 [![Release](https://img.shields.io/github/v/release/CalMWolfs/IsLazziFarming?color=informational&include_prereleases&label=release&logo=github&logoColor=white)](https://github.com/CalMWolfs/IsLazziFarming/releases/latest)
-[![Licence](https://img.shields.io/github/license/CalMWolfs/IsLazziFarming?color=informational)](./LICENSE)
+[![Licence](https://img.shields.io/github/license/CalMWolfs/IsLazziFarming?color=informational)](./LICENSE.md)
 [![Downloads](https://img.shields.io/github/downloads/CalMWolfs/IsLazziFarming/total?label=downloads&color=informational&logo=GitHub)](https://github.com/CalMWolfs/IsLazziFarming/releases/latest)
 [![Lines](https://tokei.rs/b1/github/CalMWolfs/IsLazziFarming)](https://github.com/CalMWolfs/IsLazziFarming/graphs/code-frequency)
 
