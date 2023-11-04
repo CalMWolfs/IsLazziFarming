@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger
     clientSideOnly = true,
     useMetadata = true,
     guiFactory = "com.calmwolfs.islazzifarming.config.guistuff.ConfigGuiForgeInterop",
-    version = "1.0",
+    version = "1.1",
 )
 class IsLazziFarmingMod {
     @Mod.EventHandler

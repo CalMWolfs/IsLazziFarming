@@ -33,7 +33,7 @@ object ConfigManager {
 
     lateinit var features: Features
 
-    var configDirectory = File("config/islazzifarming")
+    private var configDirectory = File("config/islazzifarming")
     private var configFile: File? = null
     lateinit var processor: MoulConfigProcessor<Features>
 
