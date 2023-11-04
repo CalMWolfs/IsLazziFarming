@@ -2,6 +2,7 @@ package com.calmwolfs.islazzifarming.utils
 
 import com.calmwolfs.islazzifarming.IsLazziFarmingMod
 import com.calmwolfs.islazzifarming.data.CopyErrorCommand
+import com.calmwolfs.islazzifarming.utils.JsonUtils.getBooleanOr
 import com.calmwolfs.islazzifarming.utils.JsonUtils.getDoubleOr
 import com.calmwolfs.islazzifarming.utils.JsonUtils.getJsonArrayOr
 import com.calmwolfs.islazzifarming.utils.JsonUtils.getJsonObjectOr
@@ -61,32 +62,43 @@ object ApiUtils {
         return JsonObject()
     }
 
-    suspend fun getLazziStats(): Double? {
-        if (config.apiKey.isEmpty()) return null
-        if (currentlyFetching) return null
-        currentlyFetching = true
-
-        val uuid = "3b1cd284767a4a5a92db253ead0621b2"
-        val profileId = "a37e31f9-6ecb-4cae-8e08-d575a2e19d7e"
-        val url = "https://api.hypixel.net/skyblock/profiles?key=${config.apiKey}&uuid=$uuid"
+    suspend fun getPlayerStats(uuid: String): Double? {
+        val url = "https://is-lazzi-farming.cwolfson58.workers.dev/?uuid=$uuid"
 
         try {
             val result = withContext(Dispatchers.IO) { getJSONResponse(url) }.asJsonObject
+
             val playerJson = result.getJsonArrayOr("profiles")
             for (profile in playerJson) {
                 val profileObj = profile.asJsonObject
-                if (profileObj.getStringOr("profile_id") != profileId) continue
+                if (!profileObj.getBooleanOr("selected")) continue
                 val members = profileObj.getAsJsonObject("members")
                 val lazziStats = members.getJsonObjectOr(uuid)
                 val farmingExp = lazziStats.getDoubleOr("experience_skill_farming")
                 if (farmingExp != 0.0) run {
-                    currentlyFetching = false
                     return farmingExp
                 }
             }
         } catch (_: Exception) {
-            println("Hypixel api issue")
+            println("Hypixel or proxy server api issue")
         }
+        return null
+    }
+
+    suspend fun getUuid(playerName: String): String? {
+        val fetchedName = playerName.lowercase()
+        if (currentlyFetching) return null
+        currentlyFetching = true
+
+        val url = "https://api.mojang.com/users/profiles/minecraft/$fetchedName"
+        try {
+            val result = withContext(Dispatchers.IO) { getJSONResponse(url) }.asJsonObject
+            currentlyFetching = false
+            return result.getStringOr("id")
+        } catch (_: Exception) {
+            println("Mojang api issue")
+        }
+
         currentlyFetching = false
         return null
     }

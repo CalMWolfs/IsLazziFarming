@@ -20,7 +20,7 @@ object Commands {
         registerCommand("islazzifarming", openConfig)
 
         registerCommand("lzcopyerror") { CopyErrorCommand.command(it) }
-        registerCommand("lzrefresh") { GetLazziStats.loadStats() }
+        registerCommand("lzrefresh") { GetLazziStats.getStats() }
     }
 
     private fun registerCommand(name: String, function: (Array<String>) -> Unit) {

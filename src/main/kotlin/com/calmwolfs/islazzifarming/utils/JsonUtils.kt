@@ -19,4 +19,8 @@ object JsonUtils {
     fun JsonObject.getJsonObjectOr(key: String, or: JsonObject = JsonObject()): JsonObject {
         return if (has(key)) get(key).asJsonObject else or
     }
+
+    fun JsonObject.getBooleanOr(key: String, or: Boolean = false): Boolean {
+        return if (has(key)) get(key).asBoolean else or
+    }
 }

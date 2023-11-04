@@ -15,66 +15,75 @@ import net.minecraft.init.Items
 import net.minecraft.item.ItemStack
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 object GetLazziStats {
-    private val config get() = IsLazziFarmingMod.feature.settings.notification
+    private val config get() = IsLazziFarmingMod.feature.settings
+    private val notificationConfig get() = config.notification
 
     private var lastFetchTime = SimpleTimeMark.farPast()
-    private var lastLazziStats = 0.0
+    private var lastFetchTimeSmall = SimpleTimeMark.farPast()
+    private var lastStats = -1.0
+    private var lastFetchedPlayer = ""
 
     @SubscribeEvent
     fun onHypixelJoin(event: HypixelJoinEvent) {
-        IsLazziFarmingMod.coroutineScope.launch {
-            val currentStats = ApiUtils.getLazziStats()
-            if (currentStats != null) {
-                lastLazziStats = currentStats
-            } else {
-                if (config.enabled) {
-                    val errorMessage = listOf("§c§lAPI ERROR", "§cLazzi02's exp was null", "§eMaybe no api key set")
-                    NotificationUtils.displayNotification(errorMessage, ItemStack(Blocks.barrier), config.sound)
-                }
-                ModUtils.error("§cLazzi02's exp was null. Maybe you have no api key set")
-            }
-            lastFetchTime = SimpleTimeMark.now()
-        }
+        getStats()
     }
 
     @SubscribeEvent
     fun onTick(event: ModTickEvent) {
         if (!event.repeatSeconds(10)) return
         if (lastFetchTime.passedSince() < 5.minutes) return
-        loadStats()
+        getStats()
     }
 
-    fun loadStats() {
-
+    fun getStats() {
+        if (lastFetchTimeSmall.passedSince() < 30.seconds) return
+        lastFetchTimeSmall = SimpleTimeMark.now()
         IsLazziFarmingMod.coroutineScope.launch {
-            val currentStats = ApiUtils.getLazziStats()
-            if (currentStats == null) {
-                if (config.enabled) {
-                    val errorMessage = listOf("§c§lAPI ERROR", "§cLazzi02's exp was null", "§eMaybe no api key set")
-                    NotificationUtils.displayNotification(errorMessage, ItemStack(Blocks.barrier), config.sound)
+            val isFirst = (lastStats == -1.0 || config.playerToTrack != lastFetchedPlayer)
+            val uuid = ApiUtils.getUuid(config.playerToTrack) ?: run {
+                if (notificationConfig.enabled) {
+                    val errorMessage = listOf("§c§lERROR", "§c${config.playerToTrack} had no uuid", "§eMaybe you didn't enter a valid username")
+                    NotificationUtils.displayNotification(errorMessage, ItemStack(Blocks.barrier), notificationConfig.sound)
                 }
-                ModUtils.error("§cLazzi02's exp was null. Maybe you have no api key set!")
-            } else {
-                val difference = currentStats - lastLazziStats
-                val gainedExp = difference != 0.0
-                val differenceString = difference.addSeparators()
-                lastLazziStats = currentStats
-                val status = if (gainedExp) "§aLazzi02 is farming" else "§eLazzi02 is not farming"
+                ModUtils.error("§c${config.playerToTrack} does not have a uuid. Make sure you entered a valid username")
 
-                if (config.enabled) {
-                    val sound = config.sound && gainedExp
-                    var displayList = listOf("§a§lLazzi02 Update:", status)
-                    if (gainedExp) displayList = displayList + "§a$differenceString Farming exp gained"
-                    NotificationUtils.displayNotification(displayList, ItemStack(Items.reeds), sound)
+                return@launch
+            }
+
+            val currentStats = ApiUtils.getPlayerStats(uuid) ?: run {
+                if (notificationConfig.enabled) {
+                    val errorMessage = listOf("§c§lAPI ERROR", "§c${config.playerToTrack}'s exp was null", "§eMaybe there was an error with the proxy server")
+                    NotificationUtils.displayNotification(errorMessage, ItemStack(Blocks.barrier), notificationConfig.sound)
                 }
+                ModUtils.error("§c${config.playerToTrack}'s exp was null. Maybe the proxy is rate limited!")
 
-                ChatUtils.chat("§a§lLazzi02 Update:")
+                return@launch
+            }
+            lastFetchedPlayer = config.playerToTrack
+            lastFetchTime = SimpleTimeMark.now()
+            val difference = currentStats - lastStats
+            lastStats = currentStats
+            if (isFirst) return@launch
+
+            val gainedExp = difference != 0.0
+            val differenceString = difference.addSeparators()
+            val status = if (gainedExp) "§a${config.playerToTrack} is farming" else "§e${config.playerToTrack} is not farming"
+
+            if (notificationConfig.enabled) {
+                val sound = notificationConfig.sound && gainedExp
+                var displayList = listOf("§a§l${config.playerToTrack} Update:", status)
+                if (gainedExp) displayList = displayList + "§a$differenceString Farming exp gained"
+                NotificationUtils.displayNotification(displayList, ItemStack(Items.reeds), sound)
+            }
+
+            if (notificationConfig.message) {
+                ChatUtils.chat("§a§l${config.playerToTrack} Update:")
                 ChatUtils.chat(status)
                 if (gainedExp) ChatUtils.chat("§a$differenceString Farming exp gained")
             }
-            lastFetchTime = SimpleTimeMark.now()
         }
     }
 }

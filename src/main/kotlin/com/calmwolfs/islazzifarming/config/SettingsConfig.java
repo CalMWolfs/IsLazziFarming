@@ -50,16 +50,21 @@ public class SettingsConfig {
     }
 
     @Expose
-    @ConfigOption(name = "Api Key", desc = "Put your api key here. §eRemember this is against Hypixel's api rules")
+    @ConfigOption(name = "Who To Track?", desc = "Which player do you want the mod to track?")
     @ConfigEditorText
-    public String apiKey = "";
+    public String playerToTrack = "Lazzi02";
 
     @Expose
-    @ConfigOption(name = "Lazzi Notifications", desc = "")
+    @ConfigOption(name = "Player Notifications", desc = "")
     @Accordion
     public Notification notification = new Notification();
 
     public static class Notification {
+        @ConfigOption(name = "Enable Messages", desc = "Enables sending a message about the player's progress")
+        @Expose
+        @ConfigEditorBoolean
+        public boolean message = true;
+
         @Expose
         @ConfigOption(name = "Notification Corner", desc = "What corner do you want the notification to display in?")
         @ConfigEditorDropdown(values = {"Top Left", "Top Right"})
@@ -80,7 +85,7 @@ public class SettingsConfig {
         @ConfigEditorBoolean
         public boolean items = true;
 
-        @ConfigOption(name = "Enabled", desc = "Shows notifications for Lazzi farming")
+        @ConfigOption(name = "Enabled", desc = "Shows notifications for your selected player's farming progress")
         @Expose
         @ConfigEditorBoolean
         public boolean enabled = true;
