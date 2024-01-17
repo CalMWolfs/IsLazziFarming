@@ -20,7 +20,6 @@ import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
 
 object ApiUtils {
-    private val config get() = IsLazziFarmingMod.feature.settings
     private val parser = JsonParser()
 
     private var currentlyFetching = false
@@ -63,7 +62,7 @@ object ApiUtils {
     }
 
     suspend fun getPlayerStats(uuid: String): Double? {
-        val url = "https://is-lazzi-farming.cwolfson58.workers.dev/?uuid=$uuid"
+        val url = "https://is-lazzi-farming.cwolfson58.workers.dev/?uuid=$uuid&v2=true"
 
         try {
             val result = withContext(Dispatchers.IO) { getJSONResponse(url) }.asJsonObject
@@ -73,9 +72,11 @@ object ApiUtils {
                 val profileObj = profile.asJsonObject
                 if (!profileObj.getBooleanOr("selected")) continue
                 val members = profileObj.getAsJsonObject("members")
-                val lazziStats = members.getJsonObjectOr(uuid)
-                val farmingExp = lazziStats.getDoubleOr("experience_skill_farming")
-                if (farmingExp != 0.0) run {
+                val playerStats = members.getJsonObjectOr(uuid)
+                val playerData = playerStats.getJsonObjectOr("player_data")
+                val experienceData = playerData.getJsonObjectOr("experience")
+                val farmingExp = experienceData.getDoubleOr("SKILL_FARMING", -1.0)
+                if (farmingExp != -1.0) run {
                     return farmingExp
                 }
             }
