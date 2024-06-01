@@ -1,4 +1,4 @@
-# IsLazziFarming Mod
+# Isn'tLazziFarming Mod
 
 [![Release](https://img.shields.io/github/v/release/CalMWolfs/IsLazziFarming?color=informational&include_prereleases&label=release&logo=github&logoColor=white)](https://github.com/CalMWolfs/IsLazziFarming/releases/latest)
 [![Licence](https://img.shields.io/github/license/CalMWolfs/IsLazziFarming?color=informational)](./LICENSE.md)
